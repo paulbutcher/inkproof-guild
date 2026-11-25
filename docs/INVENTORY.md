@@ -70,7 +70,7 @@ All seventeen are text, with the placeholders `{{AGENT}}`, `{{ORG}}`, `{{GH_OWNE
 
 ## `.env.example`
 
-The values below are the reference's defaults. The production kit's own `.env` may set others, which this file can't show: see [Production state](#production-state).
+The values below are the reference's defaults. Where the production kit's `.env` sets another, it is given too, and the bounds start from it.
 
 | Setting | Reference value | Destination |
 |---|---|---|
@@ -80,7 +80,7 @@ The values below are the reference's defaults. The production kit's own `.env` m
 | `REPO_PREFIX` | `inkproof-` | gone: the explicit list of repositories replaces it |
 | `HUMAN_USER`, `HUMAN_EMAIL` | the human's account | settings |
 | `HOST_UID`, `HOST_GID`, `STATE_DIR`, `FORGE_PORT`, `DISPATCHER_PORT` | `501`, `20`, `./`, `3000`, `3001` | settings; `STATE_DIR` is the reference checkout's at the switch |
-| `MAX_RUN_MINUTES`, `MAX_RUNS_PER_DAY`, `MAX_COORDINATOR_RUNS_PER_DAY`, `MAX_SPEND_PER_DAY` | 240, 20, 40, 0 | configuration: bounds |
+| `MAX_RUN_MINUTES`, `MAX_RUNS_PER_DAY`, `MAX_COORDINATOR_RUNS_PER_DAY`, `MAX_SPEND_PER_DAY` | 240, 20, 40, 0; production sets 150 and 250 runs a day | configuration: bounds, at production's values |
 | `AGENT_MEMORY`, `AGENT_PIDS`, `AGENT_CPUS`, `CI_MEMORY`, `CI_CPUS`, `DISPATCHER_MEMORY` | `16g`, 4096, 6, `24g`, 8, `2g` | settings: the Mac's resources |
 | `FORGE_CONCURRENCY`, `CLAIM_START_SECONDS`, `PR_OPENED_HOLD_SECONDS`, `MERGE_STUCK_SECONDS`, `CI_MISSING_SECONDS`, `RECONCILE_SECONDS`, `ITEM_CACHE_SECONDS`, `IDLE_SECONDS`, `OBLIGATION_BACKOFF`, `CI_LATE_SECONDS`, `CONFORMANCE_SETTLE_SECONDS`, `CONFORMANCE_ROUNDS`, `GATEKEEPER_SWEEP_SECONDS` | 8, 900, 600, 600, 600, 900, 3600, 1200, `0,900,900`, 3600, 600, 3, 900 | interface: timings and limits that aren't bounds; Inkproof proposes configuration for those the states and proofs depend on (`OBLIGATION_BACKOFF`, `CONFORMANCE_ROUNDS`, `CI_LATE_SECONDS`) and settings for the rest |
 | `BACKUP_DIR`, `BACKUP_KEEP`, `RESTORE_TEST_PORT` | `./backups`, 7, 3002 | settings |
@@ -172,7 +172,6 @@ What the reference's files can't show, but the switch must keep.
 | What | Where it is | Destination |
 |---|---|---|
 | Each repository's autonomy level | Its `CODEOWNERS` on `main`, written by `setup-repo.sh` | interface: configuration lists levels, while the reference and the coordinator's role read them from the forge |
-| Values the Mac's `.env` sets | The Mac | settings and configuration: the human lists any that differ from `.env.example`, as bounds start from them |
 | `inkproof-demo`, a retired agent's archived repository and disabled account | Forgejo | interface: a repository in the organisation but not in configuration |
 | History attributed to `Ghost`, from the import | Forgejo | kit: PROTOCOL.md line 10 |
 | The run budget's and `patience`'s starting values | The production ledger, which the human exports | configuration |
