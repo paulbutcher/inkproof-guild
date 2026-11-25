@@ -111,4 +111,4 @@ Applies where this project serves a UI. If it does not, skip this section.
 - The reference is inkproof-forge at the commit PLAN.md names, cloned to `../inkproof-forge`. It is also Inkproof's production kit until the switch. Read it; never change it.
 - Never patch the guild here or under `.lake`; draft an issue for lean-guild instead, for the human to file.
 - The Mac runs Inkproof's production kit: never write to its Forgejo, run Docker only in this dev container's own engine, and never commit any part of a backup.
-- No Python in this repository's code, tests or tools; shell where Lean is overkill.
+- No Python in this repository's code, tests or tools; shell where Lean is overkill. The rehearsal runs the reference's images unchanged, the one exception.
