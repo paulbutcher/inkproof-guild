@@ -2,6 +2,15 @@
 	"name": "Ubuntu",
 	"build": { "dockerfile": "Dockerfile" },
 
+  // A Docker engine of this container's own, never the Mac's, which runs Inkproof's
+  // production kit. Moby has no packages for Ubuntu resolute, so this installs Docker CE.
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": { "moby": false }
+  },
+
+  // Without it Docker creates the bind mount's source as root, and vscode can't write it.
+  "initializeCommand": "mkdir -p ${localEnv:HOME}/.claude-devcontainer",
+
   // Store Claude's persistent state on the host
   "mounts": [
     "source=${localEnv:HOME}/.claude-devcontainer,target=/home/vscode/.claude,type=bind,consistency=cached",

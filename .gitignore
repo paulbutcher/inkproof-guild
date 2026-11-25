@@ -1,1 +1,3 @@
 /.lake
+# Production backups, copied in for the rehearsal: never commit any part of one.
+/backups/
