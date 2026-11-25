@@ -12,7 +12,9 @@ ref="${2:-$here/../inkproof-forge}"
 org=tentenths human=paulbutcher owner=paulbutcher web=http://localhost:3000
 
 lake -d "$here" build inkproof-guild >/dev/null
-rm -rf "$out" && mkdir -p "$out/reference" "$out/guild"
+FORGE_ORG=$org HUMAN_USER=$human FORGE_WEB_URL=$web WORKSPACE_STATE=.inkproof \
+  "$here/.lake/build/bin/inkproof-guild" export "$out/export"
+rm -rf "$out/reference" "$out/guild" && mkdir -p "$out/reference" "$out/guild"
 
 grep -v '^#' "$ref/agents.conf" | while read -r agent _ repo _; do
   [ -n "$agent" ] || continue
@@ -22,8 +24,7 @@ grep -v '^#' "$ref/agents.conf" | while read -r agent _ repo _; do
         -e "s|{{HUMAN}}|$human|g" -e "s|{{GH_OWNER}}|$owner|g" -e "s|{{FORGE_WEB_URL}}|$web|g" "$1"
   }
   { render "$ref/roles/$agent.md"; echo; render "$ref/docker/agent/PROTOCOL.md"; } > "$out/reference/$agent.md"
-  FORGE_ORG=$org HUMAN_USER=$human FORGE_WEB_URL=$web WORKSPACE_STATE=.inkproof \
-    "$here/.lake/build/bin/inkproof-guild" instructions "$agent" > "$out/guild/$agent.md"
+  cp "$out/export/instructions/$agent.md" "$out/guild/$agent.md"
 done
 
 diff -ru "$out/reference" "$out/guild" || true
