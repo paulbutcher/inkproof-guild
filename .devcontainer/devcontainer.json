@@ -11,6 +11,10 @@
   // Without it Docker creates the bind mount's source as root, and vscode can't write it.
   "initializeCommand": "mkdir -p ${localEnv:HOME}/.claude-devcontainer",
 
+  // The reference is cloned beside the workspace. /workspaces is mounted at run time, as
+  // root's, so a chown in the Dockerfile would be hidden.
+  "postCreateCommand": "sudo chown vscode:vscode /workspaces",
+
   // Store Claude's persistent state on the host
   "mounts": [
     "source=${localEnv:HOME}/.claude-devcontainer,target=/home/vscode/.claude,type=bind,consistency=cached",

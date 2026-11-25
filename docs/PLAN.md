@@ -30,7 +30,7 @@ The order of work for Inkproof's instance of the guild. [REQUIREMENTS.md](REQUIR
 
 | # | Done |
 |---|---|
-| 0 | |
+| 0 | 2026-11-25 |
 | 1 | |
 | 2 | |
 | 3 | |
