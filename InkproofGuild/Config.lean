@@ -44,9 +44,12 @@ def project : Project where
          { name := "process", kind := .supervisor, filesOn := .all, humanDecides := true },
          { name := "lasm", kind := .milestoneReviewer, filesOn := .all, humanDecides := true }]
       upstreams := [{ name := "lasm", title := "Lasm", tracker := some "lasm" }]
+      -- From the reference's ledger, 9 to 25 November 2026: 99% of an agent's back-to-back runs
+      -- came in spells of four or fewer; 99% of units took fewer than 16 runs, and its loops ran
+      -- 17 to 28 times within hours.
       bounds :=
         { patience := 3
-          runBudget := 40
+          runBudget := 20
           maxRunsPerDay := 150
           maxCoordinatorRunsPerDay := 250 }
       layers := { lasm := true }
