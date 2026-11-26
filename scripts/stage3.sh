@@ -48,12 +48,11 @@ mkdir -p "$dir"
 } > "$KIT_ENV"
 touch "$dir/deployed"
 
-# Every agent stopped before its container first starts, and a stand-in Claude token so that
-# up.sh starts them: a stopped agent never runs, so the token is never used.
+# A stand-in Claude token, so that up.sh starts the agents: the kit starts a new agent stopped,
+# and a stopped agent never runs, so the token is never used.
 ( set -a; . "$KIT_ENV"; "$KIT" export "$state/config" >/dev/null )
 agents="$(cut -f1 "$state/config/agents.tsv")"
-mkdir -p "$state/control" "$state/secrets/claude"
-for a in $agents; do touch "$state/control/stopped-$a"; done
+mkdir -p "$state/secrets/claude"
 echo stand-in > "$state/secrets/claude/oauth-token"
 
 echo "== Up, bootstrap, up again"

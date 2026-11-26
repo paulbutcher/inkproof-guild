@@ -1,0 +1,16 @@
+# Copyright (c) 2026 Paul Butcher. All rights reserved.
+# Released under Apache 2.0 license as described in the file LICENSE.
+
+# Added to either kit's compose files for a copy restored from a production backup: nothing
+# leaves the dev container's engine, so the copy can't push to GitHub's mirrors, and Forgejo's
+# mirrors and webhooks are off besides. Actions stays on: with it off, Forgejo answers 404 for
+# a repository's runs, which both kits read as CI that may be running, so neither ever drains.
+services:
+  forgejo:
+    environment:
+      FORGEJO__mirror__ENABLED: "false"
+      FORGEJO__webhook__ALLOWED_HOST_LIST: "127.0.0.2"
+
+networks:
+  egress:
+    internal: true
