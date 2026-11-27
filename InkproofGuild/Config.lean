@@ -34,7 +34,9 @@ def project : Project where
       coordination
       repositories :=
         { name := coordination } ::
-        libraries.map fun (_, _, r, deps) => { name := repo r, dependsOn := deps.map repo }
+        -- Production's levels, so that setting up every repository changes none of them. The
+        -- coordination repository has no CI, so the gatekeeper could never approve there.
+        libraries.map fun (_, _, r, deps) => { name := repo r, dependsOn := deps.map repo, level := 3 }
       agents :=
         [{ name := "coordinator", kind := .coordinator, owns := some coordination, filesOn := .all }] ++
         libraries.map (fun (a, k, r, deps) =>

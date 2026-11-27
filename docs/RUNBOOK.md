@@ -27,17 +27,21 @@ For a new deployment, against an empty Forgejo. Production is set up already; th
 
 ## The switch
 
-Beforehand, on the Mac: clone the production checkout at the commit last rehearsed, build the kit there, and write its settings as above, with `STATE_DIR` the reference checkout's absolute path, `HUMAN_EMAIL` as in the reference's `.env`, any resource or timing that `.env` sets, and mirrors on. Then, in the reference's checkout:
+Beforehand, on the Mac: clone the production checkout at the commit last rehearsed, build the kit there, and write its settings as above, keeping `STATE_DIR=state`, with `HUMAN_EMAIL` as in the reference's `.env`, any resource or timing that `.env` sets, and mirrors on. Then, in the reference's checkout:
 
 1. `scripts/status.sh > ~/switch-before.txt`, then `scripts/drain.sh`, and wait for "safe to stop".
 2. `scripts/backup.sh`, `scripts/notify-install.sh --remove`, `scripts/backup-install.sh --remove`, then `scripts/down.sh`.
 
 In the production checkout:
 
-3. `scripts/up.sh`. It builds the guild's images and starts on the reference's volumes and `secrets/`, still draining, since `control/` is shared.
-4. `scripts/bootstrap.sh`. It leaves tokens and mirrors as they are. It sets the `DEPS_REPOSITORIES` and `MACOS_RUNNER` Actions variables, which only the guild's CI templates read, and makes what the reference's own bootstrap would have: production lacks the gatekeeper's webhook and most repositories' `not-verified` label.
-5. In the web UI, `http://localhost:3002/`, check that the kit is draining and that what waits on you and what each agent owes match `~/switch-before.txt`.
-6. Resume in the web UI, then run `scripts/backup-install.sh`.
+3. Copy the reference's state, which is four folders of its checkout, keeping permissions: `mkdir state && cp -Rp <reference>/{secrets,control,backups,proxy} state/`.
+   Then give the ledger to your user, `HOST_UID:HOST_GID`, since the reference's dispatcher ran as uid 1000: `docker run --rm -v inkproof-forge_dispatcher-state:/state alpine:3.24 chown -R 501:20 /state`.
+4. `scripts/up.sh`. It builds the guild's images and starts on the reference's volumes and the copied `secrets/`, still draining, from the copied `control/draining`.
+5. `scripts/bootstrap.sh`. It leaves tokens and mirrors as they are. It sets the `DEPS_REPOSITORIES` and `MACOS_RUNNER` Actions variables, which only the guild's CI templates read, and makes what the reference's own bootstrap would have: production lacks the gatekeeper's webhook and most repositories' `not-verified` label.
+6. In the web UI, `http://localhost:3002/`, check that the kit is draining and that what waits on you and what each agent owes match `~/switch-before.txt`.
+7. Resume in the web UI, then run `scripts/backup-install.sh`.
+
+The switch runs no `scripts/setup-repo.sh`. With no arguments it applies the configuration's starting levels, which are production's only until you change one, so give it a repository and the level it is already at, or one you are moving it to.
 
 ## The way back
 
@@ -46,7 +50,7 @@ To go back to a backup the guild made, restore it with `scripts/restore.sh BACKU
 1. Drain in the web UI, and wait until it says it is safe to stop.
 2. `scripts/switch-back.sh`. Edit the `Blocked-by:` lines it lists out of their items, and run it again until it lists nothing.
 3. `scripts/backup-install.sh --remove`, then `scripts/down.sh`.
-4. In the reference's checkout, `scripts/up.sh`. It starts draining, from the guild's drain in `control/`; check `scripts/status.sh`.
+4. In the reference's checkout, set `STATE_DIR` in `.env` to the production checkout's `state/`, as an absolute path. Give the ledger back to the reference's dispatcher, `docker run --rm -v inkproof-forge_dispatcher-state:/state alpine:3.24 chown -R 1000:1000 /state`, then `scripts/up.sh`. It starts draining, from the guild's drain in `control/`; check `scripts/status.sh`.
 5. `scripts/resume.sh`, `scripts/backup-install.sh` and `scripts/notify-install.sh`.
 
 `scripts/rehearse.sh` rehearses both, all but the launchd jobs, which only the Mac has.

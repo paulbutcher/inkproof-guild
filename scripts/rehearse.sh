@@ -190,6 +190,11 @@ refkit timeout 1800 scripts/drain.sh >>"$out/switch.log" 2>&1 && pass "the refer
 quiet "$out/switch.log" refkit scripts/backup.sh
 ls -d "$STATE"/backups/[0-9]*Z >/dev/null 2>&1 && pass "the reference backs up" || fail "the reference made no backup"
 quiet "$out/switch.log" refkit scripts/down.sh
+# The guild's state is a copy of the reference's four folders, as the runbook's switch makes it.
+mkdir -p "$dir/state-switch-guild"
+cp -Rp "$STATE"/{secrets,control,backups,proxy} "$dir/state-switch-guild/"
+sed -i "s|^STATE_DIR=.*|STATE_DIR=$dir/state-switch-guild|" "$dir/guild.env"
+STATE="$dir/state-switch-guild"
 before_volumes="$(docker volume ls -q --filter "$label" | sort)"
 quiet "$out/switch.log" guild "$guild_scripts/up.sh"
 settle
@@ -214,6 +219,8 @@ guild "$guild_scripts/switch-back.sh" > "$out/switch-back.txt" 2>&1 \
   && pass "switch-back.sh lists nothing" || echo "INFO: switch-back.sh lists items to edit first: $out/switch-back.txt"
 status | obligations > "$out/switch-guild-end.tsv"
 quiet "$out/switch.log" guild "$guild_scripts/down.sh"
+# The way back points the reference at the guild's state.
+sed -i "s|^STATE_DIR=.*|STATE_DIR=$STATE|" "$dir/reference.env"
 quiet "$out/switch.log" refkit scripts/up.sh
 settle
 [ "$(jqs .draining)" = true ] && pass "the reference finds the guild's drain" || fail "the reference isn't draining"

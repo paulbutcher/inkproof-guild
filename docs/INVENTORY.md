@@ -79,7 +79,7 @@ The values below are the reference's defaults. Where the production kit's `.env`
 | `FORGE_ORG` | `tentenths` | interface: neither of the guild's lists names it |
 | `REPO_PREFIX` | `inkproof-` | gone: the explicit list of repositories replaces it |
 | `HUMAN_USER`, `HUMAN_EMAIL` | the human's account | settings |
-| `HOST_UID`, `HOST_GID`, `STATE_DIR`, `FORGE_PORT`, `DISPATCHER_PORT` | `501`, `20`, `./`, `3000`, `3001` | settings; `STATE_DIR` is the reference checkout's at the switch |
+| `HOST_UID`, `HOST_GID`, `STATE_DIR`, `FORGE_PORT`, `DISPATCHER_PORT` | `501`, `20`, `./`, `3000`, `3001` | settings; at the switch, the guild's `STATE_DIR` holds a copy of the reference's state, which the reference then points at for the way back |
 | `MAX_RUN_MINUTES`, `MAX_RUNS_PER_DAY`, `MAX_COORDINATOR_RUNS_PER_DAY`, `MAX_SPEND_PER_DAY` | 240, 20, 40, 0; production sets 150 and 250 runs a day | configuration: bounds, at production's values |
 | `AGENT_MEMORY`, `AGENT_PIDS`, `AGENT_CPUS`, `CI_MEMORY`, `CI_CPUS`, `DISPATCHER_MEMORY` | `16g`, 4096, 6, `24g`, 8, `2g` | settings: the Mac's resources |
 | `FORGE_CONCURRENCY`, `CLAIM_START_SECONDS`, `PR_OPENED_HOLD_SECONDS`, `MERGE_STUCK_SECONDS`, `CI_MISSING_SECONDS`, `RECONCILE_SECONDS`, `ITEM_CACHE_SECONDS`, `IDLE_SECONDS`, `OBLIGATION_BACKOFF`, `CI_LATE_SECONDS`, `CONFORMANCE_SETTLE_SECONDS`, `CONFORMANCE_ROUNDS`, `GATEKEEPER_SWEEP_SECONDS` | 8, 900, 600, 600, 600, 900, 3600, 1200, `0,900,900`, 3600, 600, 3, 900 | interface: timings and limits that aren't bounds; Inkproof proposes configuration for those the states and proofs depend on (`OBLIGATION_BACKOFF`, `CONFORMANCE_ROUNDS`, `CI_LATE_SECONDS`) and settings for the rest |

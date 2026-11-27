@@ -32,9 +32,9 @@ This repository is Inkproof's instance of [lean-guild](https://github.com/paulbu
 
 ## The switch
 
-- The guild's release replaces the reference's kit on the Mac, keeping Forgejo's data, the ledger, every volume (agents' workspaces, Claude logins, the run archive) and the secrets. It keeps the reference's compose project name, `inkproof-forge`, so the volumes are the same by name, and its `STATE_DIR` is the reference checkout's, so both kits share `secrets/`, `control/` and `backups/`.
-- The order: drain the reference's kit; back up; stop it; start the guild's on the same data; check; resume. Launchd jobs for notifications go; those for backups move to the guild's scripts.
-- The way back: drain the guild's kit; stop it; drain the reference's, so it starts with no work given out; start it on the same ledger, which the guild keeps compatible; check; resume. A backup the guild made is restored with the guild's scripts first; the reference need not read one.
+- The guild's release replaces the reference's kit on the Mac, keeping Forgejo's data, the ledger, every volume (agents' workspaces, Claude logins, the run archive) and the secrets. It keeps the reference's compose project name, `inkproof-forge`, so the volumes are the same by name, and its `STATE_DIR` holds a copy of the reference's `secrets/`, `control/`, `backups/` and `proxy/`, taken once the reference has stopped. For the way back, the reference's `STATE_DIR` points at the guild's, so neither kit runs on a stale copy.
+- The order: drain the reference's kit; back up; stop it; copy its state; start the guild's on the same data; check; resume. Launchd jobs for notifications go; those for backups move to the guild's scripts.
+- The way back: drain the guild's kit; stop it; drain the reference's, so it starts with no work given out; point it at the guild's state and start it on the same ledger, which the guild keeps compatible; check; resume. A backup the guild made is restored with the guild's scripts first; the reference need not read one.
 - The human runs every step on the Mac. Agents write the steps and rehearse them in the dev container, never on the Mac.
 - Once stage 5's acceptance passes, the human archives inkproof-forge.
 
