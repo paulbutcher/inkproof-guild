@@ -1,3 +1,6 @@
 /.lake
 # Production backups, copied in for the rehearsal: never commit any part of one.
 /backups/
+# A deployment's settings and state, which hold its secrets.
+/settings.env
+/state/

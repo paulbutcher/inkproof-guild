@@ -4,19 +4,20 @@ How the human runs Inkproof's kit on the guild, on the Mac. The guild's [docs/DE
 
 ## The kit and its settings
 
-- Build Inkproof's kit executable from a checkout of this repository: `lake build`. It is `.lake/build/bin/inkproof-guild`, and the guild's scripts are in `.lake/packages/guild/scripts/`.
-- Copy [deploy/settings.env.example](../deploy/settings.env.example) outside git, and set your email and, for a deployment of its own, `STATE_DIR`. Keep its names: they are the reference's, which production's volumes and repositories hold.
-- Every script takes both from the environment: `export KIT="$PWD/.lake/build/bin/inkproof-guild" KIT_ENV=<your settings file>`, then run, for example, `.lake/packages/guild/scripts/up.sh`.
+- Production runs from a checkout of its own on the Mac, apart from the one shared with the dev container, so that a build or a guild release being rehearsed there never reaches it. Keep it at the commit last rehearsed; to take a new one, pull it, `lake build`, then `scripts/up.sh`.
+- Build Inkproof's kit executable in the checkout: `lake build`.
+- Copy [deploy/settings.env.example](../deploy/settings.env.example) to `settings.env` at the checkout's root, which git ignores, as it does `state/`, and set your email and, for a deployment of its own, `STATE_DIR`. Keep its names: they are the reference's, which production's volumes and repositories hold.
+- Each of the guild's scripts has one of the same name in [scripts/](../scripts/), which runs it with the executable and `settings.env`: `scripts/up.sh`, for example. The steps below run them from the checkout's root.
 - Inkproof adds nothing to the proxies' allowlists and overrides nothing in the guild's compose files.
 
 ## First-time setup
 
 For a new deployment, against an empty Forgejo. Production is set up already; the switch moves it onto the guild instead.
 
-1. `up.sh` builds the images and starts Forgejo, CI, the dispatcher, the gatekeeper and the web UI.
-2. `bootstrap.sh` asks for your Forgejo password, then creates the organisation, every repository, empty, and every account. With mirrors on, it needs `secrets/github/mirror-token` first.
-3. Put a token from `claude setup-token` in `$STATE_DIR/secrets/claude/oauth-token`, and run `up.sh` again: it starts every agent, stopped, since none has run before.
-4. `setup-repo.sh` once each repository has its first commit, then `backup-install.sh`. Start agents in the web UI when you are ready.
+1. `scripts/up.sh` builds the images and starts Forgejo, CI, the dispatcher, the gatekeeper and the web UI.
+2. `scripts/bootstrap.sh` asks for your Forgejo password, then creates the organisation, every repository, empty, and every account. With mirrors on, it needs `secrets/github/mirror-token` first.
+3. Put a token from `claude setup-token` in `$STATE_DIR/secrets/claude/oauth-token`, and run `scripts/up.sh` again: it starts every agent, stopped, since none has run before.
+4. `scripts/setup-repo.sh` once each repository has its first commit, then `scripts/backup-install.sh`. Start agents in the web UI when you are ready.
 
 `scripts/stage3.sh` in this repository rehearses steps 1 to 3 in the dev container's own Docker engine, with mirrors off and a stand-in Claude token, and checks the result; it refuses any other engine.
 
@@ -26,25 +27,25 @@ For a new deployment, against an empty Forgejo. Production is set up already; th
 
 ## The switch
 
-Beforehand, on the Mac: build the kit from a checkout of this repository, and write its settings as above, with `STATE_DIR` the reference checkout's absolute path, `HUMAN_EMAIL` as in the reference's `.env`, any resource or timing that `.env` sets, and mirrors on. Then, in the reference's checkout:
+Beforehand, on the Mac: clone the production checkout at the commit last rehearsed, build the kit there, and write its settings as above, with `STATE_DIR` the reference checkout's absolute path, `HUMAN_EMAIL` as in the reference's `.env`, any resource or timing that `.env` sets, and mirrors on. Then, in the reference's checkout:
 
 1. `scripts/status.sh > ~/switch-before.txt`, then `scripts/drain.sh`, and wait for "safe to stop".
 2. `scripts/backup.sh`, `scripts/notify-install.sh --remove`, `scripts/backup-install.sh --remove`, then `scripts/down.sh`.
 
-In this repository's checkout, with `KIT` and `KIT_ENV` exported:
+In the production checkout:
 
-3. `up.sh`. It builds the guild's images and starts on the reference's volumes and `secrets/`, still draining, since `control/` is shared.
-4. `bootstrap.sh`. It leaves tokens and mirrors as they are. It sets the `DEPS_REPOSITORIES` and `MACOS_RUNNER` Actions variables, which only the guild's CI templates read, and makes what the reference's own bootstrap would have: production lacks the gatekeeper's webhook and most repositories' `not-verified` label.
+3. `scripts/up.sh`. It builds the guild's images and starts on the reference's volumes and `secrets/`, still draining, since `control/` is shared.
+4. `scripts/bootstrap.sh`. It leaves tokens and mirrors as they are. It sets the `DEPS_REPOSITORIES` and `MACOS_RUNNER` Actions variables, which only the guild's CI templates read, and makes what the reference's own bootstrap would have: production lacks the gatekeeper's webhook and most repositories' `not-verified` label.
 5. In the web UI, `http://localhost:3002/`, check that the kit is draining and that what waits on you and what each agent owes match `~/switch-before.txt`.
-6. Resume in the web UI, then run `backup-install.sh`.
+6. Resume in the web UI, then run `scripts/backup-install.sh`.
 
 ## The way back
 
-To go back to a backup the guild made, restore it with the guild's `restore.sh BACKUP` first; the reference can't read one. Then:
+To go back to a backup the guild made, restore it with `scripts/restore.sh BACKUP` in the production checkout first; the reference can't read one. Then:
 
 1. Drain in the web UI, and wait until it says it is safe to stop.
-2. `switch-back.sh`. Edit the `Blocked-by:` lines it lists out of their items, and run it again until it lists nothing.
-3. `backup-install.sh --remove`, then `down.sh`.
+2. `scripts/switch-back.sh`. Edit the `Blocked-by:` lines it lists out of their items, and run it again until it lists nothing.
+3. `scripts/backup-install.sh --remove`, then `scripts/down.sh`.
 4. In the reference's checkout, `scripts/up.sh`. It starts draining, from the guild's drain in `control/`; check `scripts/status.sh`.
 5. `scripts/resume.sh`, `scripts/backup-install.sh` and `scripts/notify-install.sh`.
 
