@@ -23,3 +23,29 @@ For a new deployment, against an empty Forgejo. Production is set up already; th
 ## Rehearsal
 
 `scripts/rehearse.sh backups/<time>` restores a production backup into the dev container's own engine, isolated from GitHub, compares the reference's view of it with the guild's, and rehearses the switch and the way back on it; its outputs are in `.lake/rehearsal/out`. Run it again before the Mac takes a new guild release.
+
+## The switch
+
+Beforehand, on the Mac: build the kit from a checkout of this repository, and write its settings as above, with `STATE_DIR` the reference checkout's absolute path, `HUMAN_EMAIL` as in the reference's `.env`, any resource or timing that `.env` sets, and mirrors on. Then, in the reference's checkout:
+
+1. `scripts/status.sh > ~/switch-before.txt`, then `scripts/drain.sh`, and wait for "safe to stop".
+2. `scripts/backup.sh`, `scripts/notify-install.sh --remove`, `scripts/backup-install.sh --remove`, then `scripts/down.sh`.
+
+In this repository's checkout, with `KIT` and `KIT_ENV` exported:
+
+3. `up.sh`. It builds the guild's images and starts on the reference's volumes and `secrets/`, still draining, since `control/` is shared.
+4. `bootstrap.sh`. It leaves tokens and mirrors as they are. It sets the `DEPS_REPOSITORIES` and `MACOS_RUNNER` Actions variables, which only the guild's CI templates read, and makes what the reference's own bootstrap would have: production lacks the gatekeeper's webhook and most repositories' `not-verified` label.
+5. In the web UI, `http://localhost:3002/`, check that the kit is draining and that what waits on you and what each agent owes match `~/switch-before.txt`.
+6. Resume in the web UI, then run `backup-install.sh`.
+
+## The way back
+
+To go back to a backup the guild made, restore it with the guild's `restore.sh BACKUP` first; the reference can't read one. Then:
+
+1. Drain in the web UI, and wait until it says it is safe to stop.
+2. `switch-back.sh`. Edit the `Blocked-by:` lines it lists out of their items, and run it again until it lists nothing.
+3. `backup-install.sh --remove`, then `down.sh`.
+4. In the reference's checkout, `scripts/up.sh`. It starts draining, from the guild's drain in `control/`; check `scripts/status.sh`.
+5. `scripts/resume.sh`, `scripts/backup-install.sh` and `scripts/notify-install.sh`.
+
+`scripts/rehearse.sh` rehearses both, all but the launchd jobs, which only the Mac has.

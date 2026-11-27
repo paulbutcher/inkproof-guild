@@ -10,7 +10,7 @@ package «inkproof-guild» where
   leanOptions := #[⟨`warningAsError, true⟩]
   testDriver := "tests"
 
-require guild from git "https://github.com/paulbutcher/lean-guild" @ "v0.10.0"
+require guild from git "https://github.com/paulbutcher/lean-guild" @ "v0.11.1"
 
 input_dir text where
   path := "text"

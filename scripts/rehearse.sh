@@ -7,8 +7,8 @@
 #   1. the reference's kit on one restored copy, and its view: status.sh, its status, its ledger;
 #   2. the guild's kit on another, restored with the guild's own restore.sh, and its view;
 #   3. the switch on a third: the reference drained, backed up and stopped, the guild started on
-#      its data and resumed; then the way back: the guild drained, switch-back.sh, the guild
-#      stopped, the reference started on the same ledger and resumed.
+#      its data, bootstrapped and resumed; then the way back: the guild drained, switch-back.sh,
+#      the guild stopped, the reference started on the same ledger and resumed.
 # Each copy is the compose project inkproof-forge, the reference's fixed name, with its own state.
 # The views and their differences go to .lake/rehearsal/out; explaining them is the human's and the
 # agent's work, so differences there don't fail this script.
@@ -200,6 +200,9 @@ added="$(comm -13 <(printf '%s\n' "$before_volumes") <(docker volume ls -q --fil
 status | obligations > "$out/switch-guild.tsv"
 diff "$out/switch-before.tsv" "$out/switch-guild.tsv" > "$out/switch-obligations.diff" \
   && pass "the guild owes what the reference owed" || echo "INFO: obligations differ after the switch: $out/switch-obligations.diff"
+guild "$guild_scripts/bootstrap.sh" > "$out/switch-bootstrap.txt" 2>&1 \
+  && pass "the guild's bootstrap runs on the reference's Forgejo" || fail "the guild's bootstrap failed: $out/switch-bootstrap.txt"
+grep -E '^  ' "$out/switch-bootstrap.txt" | sed 's/^ */INFO: bootstrap: /' || true
 rm -f "$STATE/control/draining"
 until_true 60 sh -c "curl -fsS http://127.0.0.1:3401/status | jq -e '.draining == false'" \
   && pass "the guild resumes" || fail "the guild didn't resume"
