@@ -24,7 +24,7 @@ The order of work for Inkproof's instance of the guild. [REQUIREMENTS.md](REQUIR
 | 3 | Deployment | The settings template, allowlist additions, compose overrides, the runbook's setup part | the guild's kit comes up in the dev container with Inkproof's configuration, under the compose project name `inkproof-forge`, against an empty Forgejo with no mirrors and no GitHub token; it creates Inkproof's organisation, empty repositories and accounts, and starts every agent stopped | guild stage 10; the human's ledger export |
 | 4 | Rehearsal | Restoring a production backup, the comparison of views, the switch and the way back on the restored copy | every difference in the comparison explained or fixed in the guild; switch and way back both rehearsed end to end | the human's backup |
 | 5 | The switch | The runbook's switch and way-back parts, from the rehearsal | the human switches the Mac; the kit runs a week with nothing the way back would fix | the human |
-| 6 | After the switch | Taking guild releases as they come; the macOS runner when the human decides | each bump passes stage 3's acceptance and a fresh rehearsal before the Mac takes it | guild releases |
+| 6 | After the switch | Taking guild releases as they come; the macOS runner when the human decides | each bump passes stage 3's acceptance before the Mac takes it | guild releases |
 
 ## Status
 

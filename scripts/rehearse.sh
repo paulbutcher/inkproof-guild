@@ -219,6 +219,8 @@ guild "$guild_scripts/switch-back.sh" > "$out/switch-back.txt" 2>&1 \
   && pass "switch-back.sh lists nothing" || echo "INFO: switch-back.sh lists items to edit first: $out/switch-back.txt"
 status | obligations > "$out/switch-guild-end.tsv"
 quiet "$out/switch.log" guild "$guild_scripts/down.sh"
+guild "$guild_scripts/switch-back.sh" --hand-back >>"$out/switch.log" 2>&1 \
+  && pass "the guild hands the ledger back" || fail "switch-back.sh --hand-back failed"
 # The way back points the reference at the guild's state.
 sed -i "s|^STATE_DIR=.*|STATE_DIR=$STATE|" "$dir/reference.env"
 quiet "$out/switch.log" refkit scripts/up.sh
